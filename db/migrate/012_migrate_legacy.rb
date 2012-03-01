@@ -36,9 +36,12 @@ class MigrateLegacy < ActiveRecord::Migration
 
     adapter = ActiveRecord::Base.connection.instance_variable_get("@config")[:adapter].downcase
 
+    # What has to be commited here ?
     ActiveRecord::Base.connection.commit_db_transaction unless adapter.include?('sqlite')
 
     if legacy
+      # backlogs and items tables introduced by an old version of the plugin ?
+
       RbStory.reset_column_information
       Issue.reset_column_information
       RbTask.reset_column_information
@@ -54,7 +57,7 @@ class MigrateLegacy < ActiveRecord::Migration
       end
 
       trackers = {}
-      
+
       # find story/task trackers per project
       execute("
           select projects.id as project_id, pt.tracker_id as tracker_id
