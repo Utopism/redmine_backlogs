@@ -11,13 +11,16 @@ class RbTaskboardsController < RbApplicationController
 
     ## determine status columns to show
     tracker = Tracker.find_by_id(RbTask.tracker)
+
     statuses = tracker.issue_statuses
+
     # disable columns by default
     if User.current.admin?
       @statuses = statuses
     else
       enabled = {}
       statuses.each{|s| enabled[s.id] = false}
+
       # enable all statuses held by current tasks, regardless of whether the current user has access
       RbTask.find(:all, :conditions => ['fixed_version_id = ?', @sprint.id]).each {|task| enabled[task.status_id] = true }
 
@@ -38,10 +41,11 @@ class RbTaskboardsController < RbApplicationController
       @statuses = statuses.select{|s| enabled[s.id]}
     end
 
+    # Find the last updated task for the sprint
     if @sprint.stories.size == 0
       @last_updated = nil
     else
-      @last_updated = RbTask.find(:first,
+      @last_updated = RbTask.first(
                         :conditions => ['tracker_id = ? and fixed_version_id = ?', RbTask.tracker, @sprint.stories[0].fixed_version_id],
                         :order      => "updated_on DESC")
     end
